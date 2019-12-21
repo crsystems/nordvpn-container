@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+        labels:
+                name: nordvpn
+        name: nordvpn
+        namespace: default
+spec:
+        replicas: 1
+        selector:
+                matchLabels:
+                        name: nordvpn-pod
+        template:
+                metadata:
+                        labels:
+                                name: nordvpn-pod
+                        name: nordvpn-pod
+                spec:
+                        containers:
+                        - env:
+                          - name: NORDVPN_USER
+                            valueFrom:
+                                secretKeyRef:
+                                        name: nordvpn-secrets
+                                        key: user
+                          - name: NORDVPN_PASS
+                            valueFrom:
+                                secretKeyRef:
+                                        name: nordvpn-secrets
+                                        key: pass
+                          image: crsystems/nordvpn:latest
+                          name: nordvpn-container
+                          securityContext:
+                                  capabilities:
+                                          add:
+                                          - NET_ADMIN
+                        ephemeralContainers:
+                        - image: library/debian:latest
+                          name: nordvpn-debug-container
+                          targetContainerName: nordvpn-container
